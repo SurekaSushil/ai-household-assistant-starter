@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.DS_Store
+.idea/
+.vscode/
+
+# Local runtime / generated data
+data/qdrant/
+data/uploads/
+
+# Large local manuals (re-upload after clone)
+ge dishwasher.pdf
+*.pdf
+!data/sample_manual.pdf

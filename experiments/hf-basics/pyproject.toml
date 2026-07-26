@@ -1,0 +1,22 @@
+[project]
+name = "hf-basics"
+version = "0.1.0"
+description = "Session 6: direct Hugging Face / Transformers experiment (separate from FastAPI)."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "pypdf>=6.14.2",
+    "python-multipart>=0.0.32",
+    "qdrant-client>=1.18.0",
+    "torch",
+    "transformers",
+]
+
+# Official CPU index: https://pytorch.org/get-started/locally/
+# uv guide: https://docs.astral.sh/uv/guides/integration/pytorch/
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }

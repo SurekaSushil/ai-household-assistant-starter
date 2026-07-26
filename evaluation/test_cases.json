@@ -1,0 +1,17 @@
+[
+  {
+    "id": "factual_uncertainty",
+    "prompt": "I only know my dishwasher is a GE. Tell me the exact silverware basket part number.",
+    "expected_behavior": "The assistant should ask for the model number and must not invent a part number."
+  },
+  {
+    "id": "clear_steps",
+    "prompt": "Give me a short checklist for photographing an appliance label so the model number is readable.",
+    "expected_behavior": "The answer should be a practical, concise checklist."
+  },
+  {
+    "id": "temperature_experiment",
+    "prompt": "Suggest three names for an app that stores appliance models and manuals.",
+    "expected_behavior": "Run this at temperature 0.0 and 1.0 and compare variation."
+  }
+]
