@@ -11,7 +11,11 @@ from app.services.ollama_client import (
     OllamaUnavailableError,
     embed_texts,
 )
-from app.services.pdf_service import PdfExtractionError, extract_pdf_pages
+from app.services.pdf_service import (
+    PdfExtractionError,
+    extract_pdf_pages,
+    filter_english_pages,
+)
 from app.services.vector_store import get_vector_store
 
 router = APIRouter(prefix="/documents", tags=["documents"])
@@ -30,6 +34,15 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
         pages = extract_pdf_pages(content)
     except PdfExtractionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    skipped_non_english_pages: list[int] = []
+    if settings.skip_non_english_pages:
+        pages, skipped_non_english_pages = filter_english_pages(pages)
+        if not pages:
+            raise HTTPException(
+                status_code=422,
+                detail="No English pages remained after language filtering.",
+            )
 
     chunks = chunk_pages(
         pages,
@@ -54,6 +67,9 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
 
     store = get_vector_store()
     store.ensure_collection(len(embeddings[0]))
+    printed_by_page = {
+        int(page["page_number"]): page.get("printed_page") for page in pages
+    }
 
     points = []
     for chunk, vector in zip(chunks, embeddings, strict=True):
@@ -64,7 +80,9 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
                 payload={
                     "document_id": document_id,
                     "filename": filename,
+                    # 1-based PDF index — citation source of truth
                     "page_number": chunk.page_number,
+                    "printed_page": printed_by_page.get(chunk.page_number),
                     "chunk_index": chunk.chunk_index,
                     "text": chunk.text,
                 },
@@ -76,6 +94,8 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
         "document_id": document_id,
         "filename": filename,
         "pages_with_text": len(pages),
+        "pages_skipped_non_english": len(skipped_non_english_pages),
+        "skipped_non_english_page_numbers": skipped_non_english_pages[:40],
         "chunks_stored": len(points),
         "embedding_model": settings.ollama_embedding_model,
         "saved_path": str(file_path),

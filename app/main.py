@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
 
 from app.config import get_settings
+from app.routers.agent import router as agent_router
 from app.routers.documents import router as documents_router
 from app.routers.rag import router as rag_router
 from app.routers.search import router as search_router
@@ -24,6 +25,7 @@ app = FastAPI(
 app.include_router(documents_router)
 app.include_router(search_router)
 app.include_router(rag_router)
+app.include_router(agent_router)
 
 
 @app.get("/")
